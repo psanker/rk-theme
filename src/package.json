@@ -1,0 +1,4 @@
+{
+  "name" : "richs-kitch",
+  "version" : "<%= pkg.version %>"
+}

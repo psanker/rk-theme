@@ -46,13 +46,22 @@ configGrunt = function (grunt) {
 
     // Copy non-SASS/JS files
     copy: {
-      options: {
-        process: function (content, srcpath) {
-          return grunt.template.process(content);
-        }
+      cache: {
+          files: [{
+            expand: true,
+            cwd: 'vendor/img',
+            src: ['*.jpg', '*.png'],
+            dest: '.build/cache'
+          }]
       },
 
       build: {
+        options: {
+          process: function (content, srcpath) {
+            return grunt.template.process(content);
+          }
+        },
+
         files: [{
           expand: true,
           cwd: 'src',
@@ -62,7 +71,16 @@ configGrunt = function (grunt) {
           expand: true,
           cwd: 'src',
           src: ['package.json'],
-          dest: 'lib/build/'
+          dest: 'lib/build/',
+        }]
+      },
+
+      buildImages: {
+        files: [{
+          expand: true,
+          cwd: '.build/cache',
+          src: ['*.png', '*.jpg'],
+          dest: 'lib/build/assets/img/'
         }]
       },
 
@@ -77,12 +95,21 @@ configGrunt = function (grunt) {
           expand: true,
           cwd: 'src',
           src: ['*.hbs', 'partials/*.hbs'],
-          dest: 'lib/release/'
+          dest: 'lib/release/',
         }, {
           expand: true,
           cwd: 'src',
           src: ['package.json'],
-          dest: 'lib/release/'
+          dest: 'lib/release/',
+        }]
+      },
+
+      releaseImages: {
+        files: [{
+          expand: true,
+          cwd: '.build/cache',
+          src: ['*.png', '*.jpg'],
+          dest: 'lib/release/assets/img/'
         }]
       }
     },
@@ -116,13 +143,13 @@ configGrunt = function (grunt) {
       cachebuild: ['copy:build', ['sass', 'cssmin:build']],
 
       // build all
-      build: ['copy:build', ['cssmin:cache', 'sass', 'cssmin:build']],
+      build: [['copy:cache', 'copy:buildImages'], 'copy:build', ['cssmin:cache', 'sass', 'cssmin:build']],
 
       // release from cache
       cacherelease: ['copy:release', ['sass', 'cssmin:release']],
 
       // release all
-      release: ['copy:release', ['cssmin:cache', 'sass', 'cssmin:release']]
+      release: [['copy:cache', 'copy:releaseImages'], 'copy:release', ['cssmin:cache', 'sass', 'cssmin:release']]
     },
 
     watch: {
